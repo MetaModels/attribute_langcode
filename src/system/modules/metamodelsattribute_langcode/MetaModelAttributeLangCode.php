@@ -53,6 +53,7 @@ class MetaModelAttributeLangCode extends MetaModelAttributeSimple
 			'searchable',
 			'sortable',
 			'flag',
+			'mandatory',
 			'includeBlankOption'
 		));
 	}
@@ -61,7 +62,11 @@ class MetaModelAttributeLangCode extends MetaModelAttributeSimple
 	{
 		$arrFieldDef=parent::getFieldDefinition($arrOverrides);
 		$arrFieldDef['inputType'] = 'select';
-		$arrFieldDef['options'] = $this->get('langcodes');
+		$arrFieldDef['options'] = array_intersect_key(
+			MetaModelController::getInstance()->getLanguages(),
+			array_flip((array) $this->get('langcodes'))
+		);
+		$arrFieldDef['eval']['chosen'] = true;
 		return $arrFieldDef;
 	}
 
