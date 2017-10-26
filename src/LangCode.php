@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_alias.
  *
- * (c) 2012-2016 The MetaModels team.
+ * (c) 2012-2017 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -18,17 +18,23 @@
  * @author     David Maack <maack@men-at-work.de>
  * @author     Oliver Hoff <oliver@hofff.com>
  * @author     Stefan Heimes <stefan_heimes@hotmail.com>
- * @copyright  2012-2016 The MetaModels team.
+ * @author     David Molineus <david.molineus@netzmacht.de>
+ * @copyright  2012-2017 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
 
 namespace MetaModels\Attribute\LangCode;
 
+use Contao\System;
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LoadLanguageFileEvent;
+use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\BaseSimple;
+use MetaModels\Helper\TableManipulator;
+use MetaModels\IMetaModel;
 use MetaModels\Render\Template;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * This is the MetaModelAttribute class for handling langcodes.
@@ -39,6 +45,51 @@ use MetaModels\Render\Template;
  */
 class LangCode extends BaseSimple
 {
+    /**
+     * Event dispatcher.
+     *
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    /**
+     * Instantiate an MetaModel attribute.
+     *
+     * Note that you should not use this directly but use the factory classes to instantiate attributes.
+     *
+     * @param IMetaModel               $objMetaModel     The MetaModel instance this attribute belongs to.
+     *
+     * @param array                    $arrData          The information array, for attribute information, refer to
+     *                                                   documentation of table tl_metamodel_attribute and documentation
+     *                                                   of the certain attribute classes for information what values
+     *                                                   are understood.
+     *
+     * @param Connection               $connection       The database connection.
+     *
+     * @param TableManipulator         $tableManipulator Table manipulator instance.
+     *
+     * @param EventDispatcherInterface $eventDispatcher  The event disatcher.
+     */
+    public function __construct(
+        IMetaModel $objMetaModel,
+        array $arrData = [],
+        Connection $connection = null,
+        TableManipulator $tableManipulator = null,
+        EventDispatcherInterface $eventDispatcher = null
+    ) {
+        parent::__construct($objMetaModel, $arrData, $connection, $tableManipulator);
+
+        if (null === $eventDispatcher) {
+            @trigger_error(
+                'Event dispatcher is missing. It has to be passed in the constructor. Fallback will be dropped.',
+                E_USER_DEPRECATED
+            );
+            $eventDispatcher = System::getContainer()->get('event_dispatcher');
+        }
+
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -102,10 +153,8 @@ class LangCode extends BaseSimple
      */
     protected function getLanguageNames($language = null)
     {
-        $dispatcher = $this->getMetaModel()->getServiceContainer()->getEventDispatcher();
-
         $event = new LoadLanguageFileEvent('languages', $language, true);
-        $dispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
+        $this->eventDispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
 
         return $GLOBALS['TL_LANG']['LNG'];
     }
@@ -167,10 +216,8 @@ class LangCode extends BaseSimple
 
         // Switch back to the original FE language to not disturb the frontend.
         if ($loadedLanguage != $GLOBALS['TL_LANGUAGE']) {
-            $dispatcher = $this->getMetaModel()->getServiceContainer()->getEventDispatcher();
-
             $event = new LoadLanguageFileEvent('languages', null, true);
-            $dispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
+            $this->eventDispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
         }
 
         return $return;

@@ -24,6 +24,7 @@ namespace MetaModels\Attribute\LangCode;
 use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\AbstractSimpleAttributeTypeFactory;
 use MetaModels\Helper\TableManipulator;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Attribute type factory for langcode attributes.
@@ -31,14 +32,43 @@ use MetaModels\Helper\TableManipulator;
 class AttributeTypeFactory extends AbstractSimpleAttributeTypeFactory
 {
     /**
-     * {@inheritDoc}
+     * The event dispatcher.
+     *
+     * @var EventDispatcherInterface
      */
-    public function __construct(Connection $connection, TableManipulator $tableManipulator)
-    {
+    private $eventDispatcher;
+
+    /**
+     * Construct.
+     *
+     * @param Connection               $connection       Database connection.
+     * @param TableManipulator         $tableManipulator Table manipulator.
+     * @param EventDispatcherInterface $eventDispatcher  The event dispatcher.
+     */
+    public function __construct(
+        Connection $connection,
+        TableManipulator $tableManipulator,
+        EventDispatcherInterface $eventDispatcher
+    ) {
         parent::__construct($connection, $tableManipulator);
 
-        $this->typeName  = 'langcode';
-        $this->typeIcon  = 'bundles/metamodelsattributelangcode/langcode.png';
-        $this->typeClass = 'MetaModels\Attribute\LangCode\LangCode';
+        $this->typeName        = 'langcode';
+        $this->typeIcon        = 'bundles/metamodelsattributelangcode/langcode.png';
+        $this->typeClass       = 'MetaModels\Attribute\LangCode\LangCode';
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function createInstance($information, $metaModel)
+    {
+        return new $this->typeClass(
+            $metaModel,
+            $information,
+            $this->connection,
+            $this->tableManipulator,
+            $this->eventDispatcher
+        );
     }
 }

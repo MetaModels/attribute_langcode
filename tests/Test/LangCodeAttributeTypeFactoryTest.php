@@ -23,6 +23,7 @@ use MetaModels\Attribute\LangCode\AttributeTypeFactory;
 use MetaModels\Helper\TableManipulator;
 use MetaModels\IMetaModel;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Test the attribute factory.
@@ -97,8 +98,9 @@ class LangCodeAttributeTypeFactoryTest extends TestCase
     {
         $connection  = $this->mockConnection();
         $manipulator = $this->mockTableManipulator($connection);
+        $dispatcher  = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
 
-        return array(new AttributeTypeFactory($connection, $manipulator));
+        return array(new AttributeTypeFactory($connection, $manipulator, $dispatcher));
     }
 
     /**
@@ -110,8 +112,9 @@ class LangCodeAttributeTypeFactoryTest extends TestCase
     {
         $connection  = $this->mockConnection();
         $manipulator = $this->mockTableManipulator($connection);
+        $dispatcher  = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
 
-        $factory   = new AttributeTypeFactory($connection, $manipulator);
+        $factory   = new AttributeTypeFactory($connection, $manipulator, $dispatcher);
         $values    = array(
         );
         $attribute = $factory->createInstance(

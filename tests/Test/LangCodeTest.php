@@ -21,6 +21,7 @@ use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\LangCode\LangCode;
 use MetaModels\Helper\TableManipulator;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Unit tests to test class Decimal.
@@ -92,8 +93,9 @@ class LangCodeTest extends TestCase
     {
         $connection  = $this->mockConnection();
         $manipulator = $this->mockTableManipulator($connection);
+        $dispatcher  = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
 
-        $text = new LangCode($this->mockMetaModel('en', 'en'), [], $connection, $manipulator);
+        $text = new LangCode($this->mockMetaModel('en', 'en'), [], $connection, $manipulator, $dispatcher);
         $this->assertInstanceOf('MetaModels\Attribute\LangCode\LangCode', $text);
     }
 }
