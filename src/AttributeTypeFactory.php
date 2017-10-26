@@ -36,7 +36,7 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
         parent::__construct();
 
         $this->typeName  = 'langcode';
-        $this->typeIcon  = 'system/modules/metamodelsattribute_langcode/html/langcode.png';
+        $this->typeIcon  = 'bundles/metamodelsattributelangcode/langcode.png';
         $this->typeClass = 'MetaModels\Attribute\LangCode\LangCode';
     }
 }
