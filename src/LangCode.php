@@ -34,7 +34,7 @@ use MetaModels\Render\Template;
  * This is the MetaModelAttribute class for handling langcodes.
  *
  * @package    MetaModels
- * @subpackage AttributeLangcode
+ * @subpackage AttributeLangCode
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  */
 class LangCode extends BaseSimple

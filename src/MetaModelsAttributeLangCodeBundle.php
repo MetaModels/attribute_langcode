@@ -11,21 +11,21 @@
  * This project is provided in good faith and hope to be usable by anyone.
  *
  * @package    MetaModels
- * @subpackage AttributeLangcode
+ * @subpackage AttributeLangCode
  * @author     David Molineus <david.molineus@netzmacht.de>
  * @copyright  2012-2017 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_text/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
 
-namespace MetaModels\Attribute\Langcode;
+namespace MetaModels\Attribute\LangCode;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
  * The Bundle class.
  */
-class MetaModelsAttributeLangcodeBundle extends Bundle
+class MetaModelsAttributeLangCodeBundle extends Bundle
 {
 
 }
