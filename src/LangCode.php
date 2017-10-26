@@ -80,11 +80,13 @@ class LangCode extends BaseSimple
         parent::__construct($objMetaModel, $arrData, $connection, $tableManipulator);
 
         if (null === $eventDispatcher) {
+            // @codingStandardsIgnoreStart Silencing errors is discouraged
             @trigger_error(
                 'Event dispatcher is missing. It has to be passed in the constructor. Fallback will be dropped.',
                 E_USER_DEPRECATED
             );
             $eventDispatcher = System::getContainer()->get('event_dispatcher');
+            // @codingStandardsIgnoreEnd
         }
 
         $this->eventDispatcher = $eventDispatcher;
