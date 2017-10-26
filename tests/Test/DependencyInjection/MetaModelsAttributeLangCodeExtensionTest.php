@@ -11,17 +11,17 @@
  * This project is provided in good faith and hope to be usable by anyone.
  *
  * @package    MetaModels
- * @subpackage AttributeLangcode
+ * @subpackage AttributeLangCode
  * @author     David Molineus <david.molineus@netzmacht.de>
  * @copyright  2012-2017 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_text/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
 
-namespace MetaModels\Test\Attribute\Langcode\DependencyInjection;
+namespace MetaModels\Test\Attribute\LangCode\DependencyInjection;
 
-use MetaModels\Attribute\Langcode\AttributeTypeFactory;
-use MetaModels\Attribute\Langcode\DependencyInjection\MetaModelsAttributeLangcodeExtension;
+use MetaModels\Attribute\LangCode\AttributeTypeFactory;
+use MetaModels\Attribute\LangCode\DependencyInjection\MetaModelsAttributeLangCodeExtension;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -30,7 +30,7 @@ use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 /**
  * This test case test the extension.
  */
-class MetaModelsAttributeLangcodeExtensionTest extends TestCase
+class MetaModelsAttributeLangCodeExtensionTest extends TestCase
 {
     /**
      * Test that extension can be instantiated.
@@ -39,9 +39,9 @@ class MetaModelsAttributeLangcodeExtensionTest extends TestCase
      */
     public function testInstantiation()
     {
-        $extension = new MetaModelsAttributeLangcodeExtension();
+        $extension = new MetaModelsAttributeLangCodeExtension();
 
-        $this->assertInstanceOf(MetaModelsAttributeLangcodeExtension::class, $extension);
+        $this->assertInstanceOf(MetaModelsAttributeLangCodeExtension::class, $extension);
         $this->assertInstanceOf(ExtensionInterface::class, $extension);
     }
 
@@ -71,7 +71,7 @@ class MetaModelsAttributeLangcodeExtensionTest extends TestCase
                 )
             );
 
-        $extension = new MetaModelsAttributeLangcodeExtension();
+        $extension = new MetaModelsAttributeLangCodeExtension();
         $extension->load([], $container);
     }
 }

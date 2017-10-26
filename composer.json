@@ -45,12 +45,12 @@
   },
   "autoload": {
     "psr-4": {
-      "MetaModels\\Attribute\\Lancode\\": "src"
+      "MetaModels\\Attribute\\LangCode\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "MetaModels\\Test\\Attribute\\Lancode\\": "tests/Test"
+      "MetaModels\\Test\\Attribute\\LangCode\\": "tests/Test"
     }
   },
   "extra": {
