@@ -20,7 +20,7 @@
  * @filesource
  */
 
-namespace MetaModels\Attribute\LangCode;
+namespace MetaModels\AttributeLangCodeBundle\Attribute;
 
 use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\AbstractSimpleAttributeTypeFactory;
@@ -55,7 +55,7 @@ class AttributeTypeFactory extends AbstractSimpleAttributeTypeFactory
 
         $this->typeName        = 'langcode';
         $this->typeIcon        = 'bundles/metamodelsattributelangcode/langcode.png';
-        $this->typeClass       = 'MetaModels\Attribute\LangCode\LangCode';
+        $this->typeClass       = LangCode::class;
         $this->eventDispatcher = $eventDispatcher;
     }
 

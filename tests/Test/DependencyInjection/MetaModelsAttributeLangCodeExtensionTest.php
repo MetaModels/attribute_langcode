@@ -18,10 +18,10 @@
  * @filesource
  */
 
-namespace MetaModels\Test\Attribute\LangCode\DependencyInjection;
+namespace MetaModels\AttributeLangCodeBundle\Test\DependencyInjection;
 
-use MetaModels\Attribute\LangCode\AttributeTypeFactory;
-use MetaModels\Attribute\LangCode\DependencyInjection\MetaModelsAttributeLangCodeExtension;
+use MetaModels\AttributeLangCodeBundle\Attribute\AttributeTypeFactory;
+use MetaModels\AttributeLangCodeBundle\DependencyInjection\MetaModelsAttributeLangCodeExtension;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;

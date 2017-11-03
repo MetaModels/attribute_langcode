@@ -19,35 +19,41 @@
  * @filesource
  */
 
-namespace MetaModels\Test\Attribute\LangCode;
+namespace MetaModels\AttributeLangCodeBundle\Test\Attribute;
 
 use Doctrine\DBAL\Connection;
-use MetaModels\Attribute\LangCode\LangCode;
+use MetaModels\Attribute\IAttributeTypeFactory;
+use MetaModels\AttributeLangCodeBundle\Attribute\AttributeTypeFactory;
+use MetaModels\AttributeLangCodeBundle\Attribute\LangCode;
 use MetaModels\Helper\TableManipulator;
+use MetaModels\IMetaModel;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Unit tests to test class Decimal.
+ * Test the attribute factory.
  */
-class LangCodeTest extends TestCase
+class LangCodeAttributeTypeFactoryTest extends TestCase
 {
     /**
      * Mock a MetaModel.
      *
+     * @param string $tableName        The table name.
+     *
      * @param string $language         The language.
+     *
      * @param string $fallbackLanguage The fallback language.
      *
-     * @return \MetaModels\IMetaModel
+     * @return IMetaModel
      */
-    protected function mockMetaModel($language, $fallbackLanguage)
+    protected function mockMetaModel($tableName, $language, $fallbackLanguage)
     {
         $metaModel = $this->getMockBuilder('MetaModels\IMetaModel')->getMock();
 
         $metaModel
             ->expects($this->any())
             ->method('getTableName')
-            ->will($this->returnValue('mm_unittest'));
+            ->will($this->returnValue($tableName));
 
         $metaModel
             ->expects($this->any())
@@ -89,17 +95,42 @@ class LangCodeTest extends TestCase
     }
 
     /**
-     * Test that the attribute can be instantiated.
+     * Override the method to run the tests on the attribute factories to be tested.
      *
-     * @return void
+     * @return IAttributeTypeFactory[]
      */
-    public function testInstantiation()
+    protected function getAttributeFactories()
     {
         $connection  = $this->mockConnection();
         $manipulator = $this->mockTableManipulator($connection);
         $dispatcher  = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
 
-        $text = new LangCode($this->mockMetaModel('en', 'en'), [], $connection, $manipulator, $dispatcher);
-        $this->assertInstanceOf('MetaModels\Attribute\LangCode\LangCode', $text);
+        return array(new AttributeTypeFactory($connection, $manipulator, $dispatcher));
+    }
+
+    /**
+     * Test creation of a decimal attribute.
+     *
+     * @return void
+     */
+    public function testCreateAttribute()
+    {
+        $connection  = $this->mockConnection();
+        $manipulator = $this->mockTableManipulator($connection);
+        $dispatcher  = $this->getMockBuilder(EventDispatcherInterface::class)->getMock();
+
+        $factory   = new AttributeTypeFactory($connection, $manipulator, $dispatcher);
+        $values    = array(
+        );
+        $attribute = $factory->createInstance(
+            $values,
+            $this->mockMetaModel('mm_test', 'de', 'en')
+        );
+
+        $this->assertInstanceOf(LangCode::class, $attribute);
+
+        foreach ($values as $key => $value) {
+            $this->assertEquals($value, $attribute->get($key), $key);
+        }
     }
 }

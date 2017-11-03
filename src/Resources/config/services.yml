@@ -1,6 +1,6 @@
 services:
     metamodels.attribute_langcode.factory:
-        class: MetaModels\Attribute\LangCode\AttributeTypeFactory
+        class: MetaModels\AttributeLangCodeBundle\Attribute\AttributeTypeFactory
         arguments:
             - '@database_connection'
             - '@metamodels.table_manipulator'

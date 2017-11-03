@@ -18,7 +18,7 @@
  * @filesource
  */
 
-namespace MetaModels\Attribute\LangCode\DependencyInjection;
+namespace MetaModels\AttributeLangCodeBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

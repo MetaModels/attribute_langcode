@@ -24,7 +24,7 @@
  * @filesource
  */
 
-namespace MetaModels\Attribute\LangCode;
+namespace MetaModels\AttributeLangCodeBundle\Attribute;
 
 use Contao\System;
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;

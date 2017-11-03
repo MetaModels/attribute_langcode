@@ -18,12 +18,12 @@
  * @filesource
  */
 
-namespace MetaModels\Attribute\LangCode\ContaoManager;
+namespace MetaModels\AttributeLangCodeBundle\ContaoManager;
 
 use Contao\ManagerPlugin\Bundle\BundlePluginInterface;
 use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
-use MetaModels\Attribute\LangCode\MetaModelsAttributeLangCodeBundle;
+use MetaModels\AttributeLangCodeBundle\MetaModelsAttributeLangCodeBundle;
 use MetaModels\CoreBundle\MetaModelsCoreBundle;
 
 /**

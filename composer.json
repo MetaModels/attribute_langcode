@@ -45,16 +45,19 @@
   },
   "autoload": {
     "psr-4": {
-      "MetaModels\\Attribute\\LangCode\\": "src"
-    }
+      "MetaModels\\AttributeLangCodeBundle\\": "src"
+    },
+    "files": [
+      "src/deprecated-autoload.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {
-      "MetaModels\\Test\\Attribute\\LangCode\\": "tests/Test"
+      "MetaModels\\AttributeLangCodeBundle\\Test\\": "tests/Test"
     }
   },
   "extra": {
-    "contao-manager-plugin": "MetaModels\\Attribute\\LangCode\\ContaoManager\\Plugin",
+    "contao-manager-plugin": "MetaModels\\AttributeLangCodeBundle\\ContaoManager\\Plugin",
     "contao": {
       "transifex": {
         "project": "metamodels",

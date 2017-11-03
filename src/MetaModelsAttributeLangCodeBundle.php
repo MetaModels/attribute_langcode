@@ -18,7 +18,7 @@
  * @filesource
  */
 
-namespace MetaModels\Attribute\LangCode;
+namespace MetaModels\AttributeLangCodeBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
