@@ -127,7 +127,10 @@ class LangCode extends BaseSimple
     }
 
     /**
-     * Include the TL_ROOT/system/config/languages.php file and return the contained $languages variable.
+     * Get all real languages available in Contao.
+     *
+     * Include the TL_ROOT/vendor/contao/core-bundle/src/Resources/contao/config/languages.php file and return the
+     * contained language variable.
      *
      * @return string[]
      *
@@ -136,7 +139,7 @@ class LangCode extends BaseSimple
     protected function getRealLanguages()
     {
         // @codingStandardsIgnoreStart - Include is required here, can not switch to require_once.
-        include(TL_ROOT . '/system/config/languages.php');
+        include(TL_ROOT . '/vendor/contao/core-bundle/src/Resources/contao/config/languages.php');
         // @codingStandardsIgnoreEnd
 
         /** @var string[] $languages */
