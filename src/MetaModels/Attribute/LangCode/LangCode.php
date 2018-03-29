@@ -62,7 +62,7 @@ class LangCode extends BaseSimple
      */
     public function getAttributeSettingNames()
     {
-        return array_merge(
+        return \array_merge(
             parent::getAttributeSettingNames(),
             [
                 'langcodes',
@@ -127,42 +127,42 @@ class LangCode extends BaseSimple
         $loadedLanguage = $this->getMetaModel()->getActiveLanguage();
         $languageValues = $this->getLanguageNames($loadedLanguage);
         $languages      = $this->getRealLanguages();
-        $keys           = array_keys($languages);
+        $keys           = \array_keys($languages);
         $aux            = [];
         $real           = [];
 
         // Fetch real language values.
         foreach ($keys as $key) {
             if (isset($languageValues[$key])) {
-                $aux[$key]  = utf8_romanize($languageValues[$key]);
+                $aux[$key]  = \utf8_romanize($languageValues[$key]);
                 $real[$key] = $languageValues[$key];
             }
         }
 
         // Add needed fallback values.
-        $keys = array_diff($keys, array_keys($aux));
+        $keys = \array_diff($keys, \array_keys($aux));
         if ($keys) {
             $loadedLanguage = $this->getMetaModel()->getFallbackLanguage();
             $fallbackValues = $this->getLanguageNames($loadedLanguage);
             foreach ($keys as $key) {
                 if (isset($fallbackValues[$key])) {
-                    $aux[$key]  = utf8_romanize($fallbackValues[$key]);
+                    $aux[$key]  = \utf8_romanize($fallbackValues[$key]);
                     $real[$key] = $fallbackValues[$key];
                 }
             }
         }
 
-        $keys = array_diff($keys, array_keys($aux));
+        $keys = \array_diff($keys, \array_keys($aux));
         if ($keys) {
             foreach ($keys as $key) {
-                $aux[$key]  = utf8_romanize($languages[$key]);
+                $aux[$key]  = \utf8_romanize($languages[$key]);
                 $real[$key] = $languages[$key];
             }
         }
 
-        asort($aux);
+        \asort($aux);
         $return = [];
-        foreach (array_keys($aux) as $key) {
+        foreach (\array_keys($aux) as $key) {
             $return[$key] = $real[$key];
         }
 
@@ -185,9 +185,9 @@ class LangCode extends BaseSimple
         $arrFieldDef                   = parent::getFieldDefinition($arrOverrides);
         $arrFieldDef['inputType']      = 'select';
         $arrFieldDef['eval']['chosen'] = true;
-        $arrFieldDef['options']        = array_intersect_key(
+        $arrFieldDef['options']        = \array_intersect_key(
             $this->getLanguageNames(),
-            array_flip((array) $this->get('langcodes'))
+            \array_flip((array) $this->get('langcodes'))
         );
 
         return $arrFieldDef;
