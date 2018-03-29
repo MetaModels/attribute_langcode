@@ -19,6 +19,7 @@
 namespace MetaModels\Test\Attribute\LangCode;
 
 use MetaModels\Attribute\LangCode\LangCode;
+use MetaModels\MetaModel;
 
 /**
  * Unit tests to test class Decimal.
@@ -35,7 +36,7 @@ class LangCodeTest extends \PHPUnit_Framework_TestCase
      */
     protected function mockMetaModel($language, $fallbackLanguage)
     {
-        $metaModel = $this->getMock('MetaModels\MetaModel', [], [[]]);
+        $metaModel = $this->getMock(MetaModel::class, [], [[]]);
 
         $metaModel
             ->expects($this->any())
@@ -63,6 +64,6 @@ class LangCodeTest extends \PHPUnit_Framework_TestCase
     public function testInstantiation()
     {
         $text = new LangCode($this->mockMetaModel('en', 'en'));
-        $this->assertInstanceOf('MetaModels\Attribute\LangCode\LangCode', $text);
+        $this->assertInstanceOf(LangCode::class, $text);
     }
 }

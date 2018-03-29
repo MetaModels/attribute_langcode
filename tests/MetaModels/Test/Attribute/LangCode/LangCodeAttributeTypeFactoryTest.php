@@ -22,6 +22,8 @@ use MetaModels\Attribute\IAttributeTypeFactory;
 use MetaModels\Attribute\LangCode\AttributeTypeFactory;
 use MetaModels\IMetaModel;
 use MetaModels\Test\Attribute\AttributeTypeFactoryTest;
+use MetaModels\MetaModel;
+use MetaModels\Attribute\LangCode\LangCode;
 
 /**
  * Test the attribute factory.
@@ -41,7 +43,7 @@ class LangCodeAttributeTypeFactoryTest extends AttributeTypeFactoryTest
      */
     protected function mockMetaModel($tableName, $language, $fallbackLanguage)
     {
-        $metaModel = $this->getMock('MetaModels\MetaModel', [], [[]]);
+        $metaModel = $this->getMock(MetaModel::class, [], [[]]);
 
         $metaModel
             ->expects($this->any())
@@ -85,7 +87,7 @@ class LangCodeAttributeTypeFactoryTest extends AttributeTypeFactoryTest
             $this->mockMetaModel('mm_test', 'de', 'en')
         );
 
-        $this->assertInstanceOf('MetaModels\Attribute\LangCode\LangCode', $attribute);
+        $this->assertInstanceOf(LangCode::class, $attribute);
 
         foreach ($values as $key => $value) {
             $this->assertEquals($value, $attribute->get($key), $key);

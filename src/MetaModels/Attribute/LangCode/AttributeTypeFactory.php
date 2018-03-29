@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_alias.
  *
- * (c) 2012-2016 The MetaModels team.
+ * (c) 2012-2018 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,8 @@
  * @subpackage AttributeLangCode
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Stefan Heimes <stefan_heimes@hotmail.com>
- * @copyright  2012-2016 The MetaModels team.
+ * @author     Sven Baumann <baumann.sv@gmail.com>
+ * @copyright  2012-2018 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
@@ -37,6 +38,6 @@ class AttributeTypeFactory extends AbstractAttributeTypeFactory
 
         $this->typeName  = 'langcode';
         $this->typeIcon  = 'system/modules/metamodelsattribute_langcode/html/langcode.png';
-        $this->typeClass = 'MetaModels\Attribute\LangCode\LangCode';
+        $this->typeClass = LangCode::class;
     }
 }
