@@ -10,6 +10,7 @@
  * @package    MetaModels
  * @subpackage Tests
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
+ * @author     Sven Baumann <baumann.sv@gmail.com>
  * @copyright  The MetaModels team.
  * @license    LGPL.
  * @filesource
@@ -21,6 +22,8 @@ use MetaModels\Attribute\IAttributeTypeFactory;
 use MetaModels\Attribute\LangCode\AttributeTypeFactory;
 use MetaModels\IMetaModel;
 use MetaModels\Test\Attribute\AttributeTypeFactoryTest;
+use MetaModels\MetaModel;
+use MetaModels\Attribute\LangCode\LangCode;
 
 /**
  * Test the attribute factory.
@@ -40,11 +43,7 @@ class LangCodeAttributeTypeFactoryTest extends AttributeTypeFactoryTest
      */
     protected function mockMetaModel($tableName, $language, $fallbackLanguage)
     {
-        $metaModel = $this->getMock(
-            'MetaModels\MetaModel',
-            array(),
-            array(array())
-        );
+        $metaModel = $this->getMockBuilder(MetaModel::class)->setMethods([])->setConstructorArgs([[]])->getMock();
 
         $metaModel
             ->expects($this->any())
@@ -71,7 +70,7 @@ class LangCodeAttributeTypeFactoryTest extends AttributeTypeFactoryTest
      */
     protected function getAttributeFactories()
     {
-        return array(new AttributeTypeFactory());
+        return [new AttributeTypeFactory()];
     }
 
     /**
@@ -82,14 +81,13 @@ class LangCodeAttributeTypeFactoryTest extends AttributeTypeFactoryTest
     public function testCreateSelect()
     {
         $factory   = new AttributeTypeFactory();
-        $values    = array(
-        );
+        $values    = [];
         $attribute = $factory->createInstance(
             $values,
             $this->mockMetaModel('mm_test', 'de', 'en')
         );
 
-        $this->assertInstanceOf('MetaModels\Attribute\LangCode\LangCode', $attribute);
+        $this->assertInstanceOf(LangCode::class, $attribute);
 
         foreach ($values as $key => $value) {
             $this->assertEquals($value, $attribute->get($key), $key);

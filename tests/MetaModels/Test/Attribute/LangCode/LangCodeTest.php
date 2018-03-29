@@ -10,6 +10,7 @@
  * @package    MetaModels
  * @subpackage Tests
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
+ * @author     Sven Baumann <baumann.sv@gmail.com>
  * @copyright  The MetaModels team.
  * @license    LGPL.
  * @filesource
@@ -18,11 +19,13 @@
 namespace MetaModels\Test\Attribute\LangCode;
 
 use MetaModels\Attribute\LangCode\LangCode;
+use MetaModels\MetaModel;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests to test class Decimal.
  */
-class LangCodeTest extends \PHPUnit_Framework_TestCase
+class LangCodeTest extends TestCase
 {
     /**
      * Mock a MetaModel.
@@ -34,11 +37,7 @@ class LangCodeTest extends \PHPUnit_Framework_TestCase
      */
     protected function mockMetaModel($language, $fallbackLanguage)
     {
-        $metaModel = $this->getMock(
-            'MetaModels\MetaModel',
-            array(),
-            array(array())
-        );
+        $metaModel = $this->getMockBuilder(MetaModel::class)->setMethods([])->setConstructorArgs([[]])->getMock();
 
         $metaModel
             ->expects($this->any())
@@ -66,6 +65,6 @@ class LangCodeTest extends \PHPUnit_Framework_TestCase
     public function testInstantiation()
     {
         $text = new LangCode($this->mockMetaModel('en', 'en'));
-        $this->assertInstanceOf('MetaModels\Attribute\LangCode\LangCode', $text);
+        $this->assertInstanceOf(LangCode::class, $text);
     }
 }
