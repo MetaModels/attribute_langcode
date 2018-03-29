@@ -8,9 +8,10 @@
  *
  * @license http://www.gnu.org/licenses/lgpl-3.0.html LGPL
  *
- * last-updated: 2017-05-10T00:07:24+02:00
+ * last-updated: 2018-03-29T11:15:36+02:00
  */
 
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['langcodes']['0']          = 'Sprachschlüssel';
+$GLOBALS['TL_LANG']['tl_metamodel_attribute']['langcodes']['1']          = 'Sprachschlüssel wählen.';
 $GLOBALS['TL_LANG']['tl_metamodel_attribute']['typeOptions']['langcode'] = 'Sprachschlüssel';
 
