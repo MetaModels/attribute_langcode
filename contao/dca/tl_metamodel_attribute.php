@@ -18,27 +18,25 @@
  * @author     David Maack <maack@men-at-work.de>
  * @author     Stefan Heimes <stefan_heimes@hotmail.com>
  * @author     Ingolf Steinhardt <info@e-spin.de>
+ * @author     Sven Baumann <baumann.sv@gmail.com>
  * @copyright  2012-2018 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0
  * @filesource
  */
 
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['langcode extends _simpleattribute_'] = array
-(
-    '+display' => array('langcodes after description')
-);
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['metapalettes']['langcode extends _simpleattribute_'] = [
+    '+display' => ['langcodes after description']
+];
 
-$GLOBALS['TL_DCA']['tl_metamodel_attribute']['fields']['langcodes'] = array
-(
+$GLOBALS['TL_DCA']['tl_metamodel_attribute']['fields']['langcodes'] = [
     'label'     => &$GLOBALS['TL_LANG']['tl_metamodel_attribute']['langcodes'],
     'exclude'   => true,
     'inputType' => 'checkbox',
     'sql'       => 'text NULL',
-    'eval'      => array
-    (
+    'eval'      => [
         'doNotSaveEmpty' => true,
         'alwaysSave'     => true,
         'multiple'       => true
-    ),
+    ],
     'options'   => $this->getLanguages()
-);
+];
