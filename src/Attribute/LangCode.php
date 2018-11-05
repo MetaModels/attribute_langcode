@@ -244,6 +244,53 @@ class LangCode extends BaseSimple
     /**
      * {@inheritDoc}
      */
+    public function getFilterOptions($idList, $usedOnly, &$arrCount = null)
+    {
+        // If empty list, return empty result. See also MM-Core #379 for discussion.
+        if ($idList === array()) {
+            return array();
+        }
+
+        $languages = $this->getLanguages();
+        $strCol   = $this->getColName();
+        if ($idList) {
+            $statement = $this
+                ->connection
+                ->createQueryBuilder()
+                ->select($strCol . ', COUNT(' . $strCol . ') as mm_count')
+                ->from($this->getMetaModel()->getTableName())
+                ->where('id IN (:ids)')
+                ->groupBy($strCol)
+                ->orderBy('FIELD(id, :ids)')
+                ->setParameter('ids', $idList, Connection::PARAM_STR_ARRAY)
+                ->execute();
+        } elseif ($usedOnly) {
+            $statement = $this
+                ->connection
+                ->createQueryBuilder()
+                ->select($strCol . ', COUNT(' . $strCol . ') as mm_count')
+                ->from($this->getMetaModel()->getTableName())
+                ->groupBy($strCol)
+                ->orderBy($strCol)
+                ->execute();
+        } else {
+            return $languages;
+        }
+
+        $arrResult = array();
+        while ($objRow = $statement->fetch(\PDO::FETCH_OBJ)) {
+            if (is_array($arrCount)) {
+                $arrCount[$objRow->$strCol] = $objRow->mm_count;
+            }
+            $arrResult[$objRow->$strCol] = ($languages[$objRow->$strCol]) ?: $objRow->$strCol;
+        }
+
+        return $arrResult;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getFieldDefinition($arrOverrides = array())
     {
         $arrFieldDef                   = parent::getFieldDefinition($arrOverrides);
