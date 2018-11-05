@@ -186,7 +186,7 @@ class LangCode extends BaseSimple
     protected function getLanguages()
     {
         // Check if we have the data in the cache.
-        if(null !== $this->languageCache){
+        if (null !== $this->languageCache) {
             return $this->languageCache;
         }
 
@@ -252,7 +252,7 @@ class LangCode extends BaseSimple
         }
 
         $languages = $this->getLanguages();
-        $strCol   = $this->getColName();
+        $strCol    = $this->getColName();
         if ($idList) {
             $statement = $this
                 ->connection
