@@ -208,14 +208,7 @@ class LangCode extends BaseSimple
         // Add needed fallback values.
         $keys = \array_diff($keys, \array_keys($aux));
         if ($keys) {
-            $loadedLanguage = $this->getMetaModel()->getFallbackLanguage();
-            $fallbackValues = $this->getLanguageNames($loadedLanguage);
-            foreach ($keys as $key) {
-                if (isset($fallbackValues[$key])) {
-                    $aux[$key]  = \utf8_romanize($fallbackValues[$key]);
-                    $real[$key] = $fallbackValues[$key];
-                }
-            }
+            $this->addNeededFallbackLanguages($keys, $aux, $real);
         }
 
         $keys = \array_diff($keys, \array_keys($aux));
@@ -239,6 +232,29 @@ class LangCode extends BaseSimple
         }
 
         return $this->languageCache = $return;
+    }
+
+    /**
+     * Add the fallback languages to the array.
+     *
+     * @param array $keys The lang keys.
+     *
+     * @param array $aux  The formatted current values, as references.
+     *
+     * @param array $real The real current values, as references.
+     *
+     * @return void
+     */
+    private function addNeededFallbackLanguages($keys, &$aux, &$real)
+    {
+        $loadedLanguage = $this->getMetaModel()->getFallbackLanguage();
+        $fallbackValues = $this->getLanguageNames($loadedLanguage);
+        foreach ($keys as $key) {
+            if (isset($fallbackValues[$key])) {
+                $aux[$key]  = \utf8_romanize($fallbackValues[$key]);
+                $real[$key] = $fallbackValues[$key];
+            }
+        }
     }
 
     /**
