@@ -54,6 +54,13 @@ class LangCode extends BaseSimple
     private $eventDispatcher;
 
     /**
+     * Holds the result of the function getLangauge.
+     *
+     * @var null|array
+     */
+    private $languageCache = null;
+
+    /**
      * Instantiate an MetaModel attribute.
      *
      * Note that you should not use this directly but use the factory classes to instantiate attributes.
@@ -178,6 +185,11 @@ class LangCode extends BaseSimple
      */
     protected function getLanguages()
     {
+        // Check if we have the data in the cache.
+        if (null !== $this->languageCache) {
+            return $this->languageCache;
+        }
+
         $loadedLanguage = $this->getMetaModel()->getActiveLanguage();
         $languageValues = $this->getLanguageNames($loadedLanguage);
         $languages      = $this->getRealLanguages();
@@ -226,7 +238,54 @@ class LangCode extends BaseSimple
             $this->eventDispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
         }
 
-        return $return;
+        return $this->languageCache = $return;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getFilterOptions($idList, $usedOnly, &$arrCount = null)
+    {
+        // If empty list, return empty result. See also MM-Core #379 for discussion.
+        if ($idList === array()) {
+            return array();
+        }
+
+        $languages = $this->getLanguages();
+        $strCol    = $this->getColName();
+        if ($idList) {
+            $statement = $this
+                ->connection
+                ->createQueryBuilder()
+                ->select($strCol . ', COUNT(' . $strCol . ') as mm_count')
+                ->from($this->getMetaModel()->getTableName())
+                ->where('id IN (:ids)')
+                ->groupBy($strCol)
+                ->orderBy('FIELD(id, :ids)')
+                ->setParameter('ids', $idList, Connection::PARAM_STR_ARRAY)
+                ->execute();
+        } elseif ($usedOnly) {
+            $statement = $this
+                ->connection
+                ->createQueryBuilder()
+                ->select($strCol . ', COUNT(' . $strCol . ') as mm_count')
+                ->from($this->getMetaModel()->getTableName())
+                ->groupBy($strCol)
+                ->orderBy($strCol)
+                ->execute();
+        } else {
+            return $languages;
+        }
+
+        $arrResult = array();
+        while ($objRow = $statement->fetch(\PDO::FETCH_OBJ)) {
+            if (is_array($arrCount)) {
+                $arrCount[$objRow->$strCol] = $objRow->mm_count;
+            }
+            $arrResult[$objRow->$strCol] = ($languages[$objRow->$strCol]) ?: $objRow->$strCol;
+        }
+
+        return $arrResult;
     }
 
     /**
