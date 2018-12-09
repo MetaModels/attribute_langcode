@@ -13,8 +13,6 @@
  * @package    MetaModels
  * @subpackage AttributeLangCode
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
- * @author     Andreas Isaak <andy.jared@googlemail.com>
- * @author     Cliff Parnitzky <github@cliff-parnitzky.de>
  * @author     Stefan Heimes <stefan_heimes@hotmail.com>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @copyright  2012-2018 The MetaModels team.
