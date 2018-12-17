@@ -41,6 +41,13 @@ use MetaModels\Render\Template;
 class LangCode extends BaseSimple
 {
     /**
+     * Holds the result of the function getLangauge.
+     *
+     * @var null|array
+     */
+    private $languageCache = null;
+
+    /**
      * {@inheritDoc}
      */
     protected function prepareTemplate(Template $objTemplate, $arrRowData, $objSettings)
@@ -124,6 +131,11 @@ class LangCode extends BaseSimple
      */
     protected function getLanguages()
     {
+        // Check if we have the data in the cache.
+        if (null !== $this->languageCache) {
+            return $this->languageCache;
+        }
+
         $loadedLanguage = $this->getMetaModel()->getActiveLanguage();
         $languageValues = $this->getLanguageNames($loadedLanguage);
         $languages      = $this->getRealLanguages();
@@ -174,7 +186,7 @@ class LangCode extends BaseSimple
             $dispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
         }
 
-        return $return;
+        return $this->languageCache = $return;
     }
 
     /**
