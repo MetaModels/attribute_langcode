@@ -219,7 +219,10 @@ class LangCode extends BaseSimple
                 ORDER BY ' . $strCol
             );
         } else {
-            return $languages;
+            return \array_intersect_key(
+                $this->getLanguageNames(),
+                \array_flip((array)$this->get('langcodes'))
+            );
         }
 
         $arrResult = array();
