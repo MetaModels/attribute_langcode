@@ -216,7 +216,7 @@ class LangCode extends BaseSimple
         } else {
             return \array_intersect_key(
                 $this->getLanguageNames(),
-                \array_flip((array)$this->get('langcodes'))
+                \array_flip((array) $this->get('langcodes'))
             );
         }
 
