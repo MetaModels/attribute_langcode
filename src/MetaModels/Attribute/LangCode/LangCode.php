@@ -192,6 +192,50 @@ class LangCode extends BaseSimple
     /**
      * {@inheritDoc}
      */
+    public function getFilterOptions($idList, $usedOnly, &$arrCount = null)
+    {
+        // If empty list, return empty result. See also #379 for discussion.
+        if ($idList === array()) {
+            return array();
+        }
+
+        $languages = $this->getLanguages();
+        $strCol    = $this->getColName();
+        if ($idList) {
+            $objRow = $this->getMetaModel()->getServiceContainer()->getDatabase()
+                           ->prepare(
+                               'SELECT ' . $strCol . ', COUNT(' . $strCol . ') as mm_count
+                    FROM ' . $this->getMetaModel()->getTableName() .
+                               ' WHERE id IN (' . $this->parameterMask($idList) . ')
+                    GROUP BY ' . $strCol . '
+                    ORDER BY FIELD(id,' . $this->parameterMask($idList). ')'
+                           )
+                           ->execute(array_merge($idList, $idList));
+        } elseif ($usedOnly) {
+            $objRow = $this->getMetaModel()->getServiceContainer()->getDatabase()->execute(
+                'SELECT ' . $strCol . ', COUNT(' . $strCol . ') as mm_count
+                FROM ' . $this->getMetaModel()->getTableName() . '
+                GROUP BY ' . $strCol . '
+                ORDER BY ' . $strCol
+            );
+        } else {
+            return $languages;
+        }
+
+        $arrResult = array();
+        while ($objRow->next()) {
+            if (is_array($arrCount)) {
+                $arrCount[$objRow->$strCol] = $objRow->mm_count;
+            }
+
+            $arrResult[$objRow->$strCol] = ($languages[$objRow->$strCol]) ?: $objRow->$strCol;
+        }
+        return $arrResult;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getFieldDefinition($arrOverrides = array())
     {
         $arrFieldDef                   = parent::getFieldDefinition($arrOverrides);
