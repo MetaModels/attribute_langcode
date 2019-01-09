@@ -1,17 +1,16 @@
 <?php
 
 /**
- * This file is part of MetaModels/attribute_alias.
+ * This file is part of MetaModels/attribute_langcode.
  *
- * (c) 2012-2018 The MetaModels team.
+ * (c) 2012-2019 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  *
  * This project is provided in good faith and hope to be usable by anyone.
  *
- * @package    MetaModels
- * @subpackage AttributeLangCode
+ * @package    MetaModels/attribute_langcode
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     Andreas Isaak <andy.jared@googlemail.com>
  * @author     Cliff Parnitzky <github@cliff-parnitzky.de>
@@ -19,8 +18,8 @@
  * @author     Oliver Hoff <oliver@hofff.com>
  * @author     Stefan Heimes <stefan_heimes@hotmail.com>
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @copyright  2012-2018 The MetaModels team.
- * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0
+ * @copyright  2012-2019 The MetaModels team.
+ * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
 
@@ -33,13 +32,16 @@ use MetaModels\Render\Template;
 
 /**
  * This is the MetaModelAttribute class for handling langcodes.
- *
- * @package    MetaModels
- * @subpackage AttributeLangcode
- * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  */
 class LangCode extends BaseSimple
 {
+    /**
+     * Holds the result of the function getLangauge.
+     *
+     * @var null|array
+     */
+    private $languageCache = null;
+
     /**
      * {@inheritDoc}
      */
@@ -124,6 +126,11 @@ class LangCode extends BaseSimple
      */
     protected function getLanguages()
     {
+        // Check if we have the data in the cache.
+        if (null !== $this->languageCache) {
+            return $this->languageCache;
+        }
+
         $loadedLanguage = $this->getMetaModel()->getActiveLanguage();
         $languageValues = $this->getLanguageNames($loadedLanguage);
         $languages      = $this->getRealLanguages();
@@ -142,14 +149,7 @@ class LangCode extends BaseSimple
         // Add needed fallback values.
         $keys = \array_diff($keys, \array_keys($aux));
         if ($keys) {
-            $loadedLanguage = $this->getMetaModel()->getFallbackLanguage();
-            $fallbackValues = $this->getLanguageNames($loadedLanguage);
-            foreach ($keys as $key) {
-                if (isset($fallbackValues[$key])) {
-                    $aux[$key]  = \utf8_romanize($fallbackValues[$key]);
-                    $real[$key] = $fallbackValues[$key];
-                }
-            }
+            $this->addNeededFallbackLanguages($keys, $aux, $real);
         }
 
         $keys = \array_diff($keys, \array_keys($aux));
@@ -174,7 +174,77 @@ class LangCode extends BaseSimple
             $dispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
         }
 
-        return $return;
+        return $this->languageCache = $return;
+    }
+
+    /**
+     * Add the fallback languages to the array.
+     *
+     * @param array $keys The lang keys.
+     *
+     * @param array $aux  The formatted current values, as references.
+     *
+     * @param array $real The real current values, as references.
+     *
+     * @return void
+     */
+    private function addNeededFallbackLanguages($keys, &$aux, &$real)
+    {
+        $loadedLanguage = $this->getMetaModel()->getFallbackLanguage();
+        $fallbackValues = $this->getLanguageNames($loadedLanguage);
+        foreach ($keys as $key) {
+            if (isset($fallbackValues[$key])) {
+                $aux[$key]  = \utf8_romanize($fallbackValues[$key]);
+                $real[$key] = $fallbackValues[$key];
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getFilterOptions($idList, $usedOnly, &$arrCount = null)
+    {
+        // If empty list, return empty result. See also #379 for discussion.
+        if ($idList === array()) {
+            return array();
+        }
+
+        $languages = $this->getLanguages();
+        $strCol    = $this->getColName();
+        if ($idList) {
+            $objRow = $this->getMetaModel()->getServiceContainer()->getDatabase()
+                           ->prepare(
+                               'SELECT ' . $strCol . ', COUNT(' . $strCol . ') as mm_count
+                    FROM ' . $this->getMetaModel()->getTableName() .
+                               ' WHERE id IN (' . $this->parameterMask($idList) . ')
+                    GROUP BY ' . $strCol . '
+                    ORDER BY FIELD(id,' . $this->parameterMask($idList). ')'
+                           )
+                           ->execute(array_merge($idList, $idList));
+        } elseif ($usedOnly) {
+            $objRow = $this->getMetaModel()->getServiceContainer()->getDatabase()->execute(
+                'SELECT ' . $strCol . ', COUNT(' . $strCol . ') as mm_count
+                FROM ' . $this->getMetaModel()->getTableName() . '
+                GROUP BY ' . $strCol . '
+                ORDER BY ' . $strCol
+            );
+        } else {
+            return \array_intersect_key(
+                $this->getLanguageNames(),
+                \array_flip((array) $this->get('langcodes'))
+            );
+        }
+
+        $arrResult = array();
+        while ($objRow->next()) {
+            if (is_array($arrCount)) {
+                $arrCount[$objRow->$strCol] = $objRow->mm_count;
+            }
+
+            $arrResult[$objRow->$strCol] = ($languages[$objRow->$strCol]) ?: $objRow->$strCol;
+        }
+        return $arrResult;
     }
 
     /**
