@@ -15,17 +15,23 @@
  * @author     Andreas Isaak <andy.jared@googlemail.com>
  * @author     Cliff Parnitzky <github@cliff-parnitzky.de>
  * @author     Stefan Heimes <stefan_heimes@hotmail.com>
+ * @author     David Molineus <david.molineus@netzmacht.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @copyright  2012-2019 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
 
-/**
- * Register the templates
- */
-\Contao\TemplateLoader::addFiles(
-    [
-        'mm_attr_langcode' => 'system/modules/metamodelsattribute_langcode/templates',
+$GLOBALS['TL_DCA']['tl_metamodel_dcasetting']['metasubselectpalettes']['attr_id']['langcode'] = [
+    'presentation' => [
+        'tl_class',
+    ],
+    'functions'    => [
+        'mandatory',
+        'includeBlankOption'
+    ],
+    'overview'     => [
+        'filterable',
+        'searchable',
     ]
-);
+];

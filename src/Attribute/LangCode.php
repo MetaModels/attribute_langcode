@@ -17,18 +17,24 @@
  * @author     David Maack <maack@men-at-work.de>
  * @author     Oliver Hoff <oliver@hofff.com>
  * @author     Stefan Heimes <stefan_heimes@hotmail.com>
+ * @author     David Molineus <david.molineus@netzmacht.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @copyright  2012-2019 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
 
-namespace MetaModels\Attribute\LangCode;
+namespace MetaModels\AttributeLangCodeBundle\Attribute;
 
+use Contao\System;
 use ContaoCommunityAlliance\Contao\Bindings\ContaoEvents;
 use ContaoCommunityAlliance\Contao\Bindings\Events\System\LoadLanguageFileEvent;
+use Doctrine\DBAL\Connection;
 use MetaModels\Attribute\BaseSimple;
+use MetaModels\Helper\TableManipulator;
+use MetaModels\IMetaModel;
 use MetaModels\Render\Template;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * This is the MetaModelAttribute class for handling langcodes.
@@ -36,11 +42,58 @@ use MetaModels\Render\Template;
 class LangCode extends BaseSimple
 {
     /**
+     * Event dispatcher.
+     *
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    /**
      * Holds the result of the function getLangauge.
      *
      * @var null|array
      */
     private $languageCache = null;
+
+    /**
+     * Instantiate an MetaModel attribute.
+     *
+     * Note that you should not use this directly but use the factory classes to instantiate attributes.
+     *
+     * @param IMetaModel               $objMetaModel     The MetaModel instance this attribute belongs to.
+     *
+     * @param array                    $arrData          The information array, for attribute information, refer to
+     *                                                   documentation of table tl_metamodel_attribute and documentation
+     *                                                   of the certain attribute classes for information what values
+     *                                                   are understood.
+     *
+     * @param Connection               $connection       The database connection.
+     *
+     * @param TableManipulator         $tableManipulator Table manipulator instance.
+     *
+     * @param EventDispatcherInterface $eventDispatcher  The event disatcher.
+     */
+    public function __construct(
+        IMetaModel $objMetaModel,
+        array $arrData = [],
+        Connection $connection = null,
+        TableManipulator $tableManipulator = null,
+        EventDispatcherInterface $eventDispatcher = null
+    ) {
+        parent::__construct($objMetaModel, $arrData, $connection, $tableManipulator);
+
+        if (null === $eventDispatcher) {
+            // @codingStandardsIgnoreStart Silencing errors is discouraged
+            @trigger_error(
+                'Event dispatcher is missing. It has to be passed in the constructor. Fallback will be dropped.',
+                E_USER_DEPRECATED
+            );
+            $eventDispatcher = System::getContainer()->get('event_dispatcher');
+            // @codingStandardsIgnoreEnd
+        }
+
+        $this->eventDispatcher = $eventDispatcher;
+    }
 
     /**
      * {@inheritDoc}
@@ -77,7 +130,10 @@ class LangCode extends BaseSimple
     }
 
     /**
-     * Include the TL_ROOT/system/config/languages.php file and return the contained $languages variable.
+     * Get all real languages available in Contao.
+     *
+     * Include the TL_ROOT/vendor/contao/core-bundle/src/Resources/contao/config/languages.php file and return the
+     * contained language variable.
      *
      * @return string[]
      *
@@ -86,7 +142,7 @@ class LangCode extends BaseSimple
     protected function getRealLanguages()
     {
         // @codingStandardsIgnoreStart - Include is required here, can not switch to require_once.
-        include(TL_ROOT . '/system/config/languages.php');
+        include(TL_ROOT . '/vendor/contao/core-bundle/src/Resources/contao/config/languages.php');
         // @codingStandardsIgnoreEnd
 
         /** @var string[] $languages */
@@ -105,10 +161,8 @@ class LangCode extends BaseSimple
      */
     protected function getLanguageNames($language = null)
     {
-        $dispatcher = $this->getMetaModel()->getServiceContainer()->getEventDispatcher();
-
         $event = new LoadLanguageFileEvent('languages', $language, true);
-        $dispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
+        $this->eventDispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
 
         return $GLOBALS['TL_LANG']['LNG'];
     }
@@ -168,10 +222,8 @@ class LangCode extends BaseSimple
 
         // Switch back to the original FE language to not disturb the frontend.
         if ($loadedLanguage != $GLOBALS['TL_LANGUAGE']) {
-            $dispatcher = $this->getMetaModel()->getServiceContainer()->getEventDispatcher();
-
             $event = new LoadLanguageFileEvent('languages', null, true);
-            $dispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
+            $this->eventDispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
         }
 
         return $this->languageCache = $return;
@@ -205,7 +257,7 @@ class LangCode extends BaseSimple
      */
     public function getFilterOptions($idList, $usedOnly, &$arrCount = null)
     {
-        // If empty list, return empty result. See also #379 for discussion.
+        // If empty list, return empty result. See also MM-Core #379 for discussion.
         if ($idList === array()) {
             return array();
         }
@@ -213,22 +265,25 @@ class LangCode extends BaseSimple
         $languages = $this->getLanguages();
         $strCol    = $this->getColName();
         if ($idList) {
-            $objRow = $this->getMetaModel()->getServiceContainer()->getDatabase()
-                           ->prepare(
-                               'SELECT ' . $strCol . ', COUNT(' . $strCol . ') as mm_count
-                    FROM ' . $this->getMetaModel()->getTableName() .
-                               ' WHERE id IN (' . $this->parameterMask($idList) . ')
-                    GROUP BY ' . $strCol . '
-                    ORDER BY FIELD(id,' . $this->parameterMask($idList). ')'
-                           )
-                           ->execute(array_merge($idList, $idList));
+            $statement = $this
+                ->connection
+                ->createQueryBuilder()
+                ->select($strCol . ', COUNT(' . $strCol . ') as mm_count')
+                ->from($this->getMetaModel()->getTableName())
+                ->where('id IN (:ids)')
+                ->groupBy($strCol)
+                ->orderBy('FIELD(id, :ids)')
+                ->setParameter('ids', $idList, Connection::PARAM_STR_ARRAY)
+                ->execute();
         } elseif ($usedOnly) {
-            $objRow = $this->getMetaModel()->getServiceContainer()->getDatabase()->execute(
-                'SELECT ' . $strCol . ', COUNT(' . $strCol . ') as mm_count
-                FROM ' . $this->getMetaModel()->getTableName() . '
-                GROUP BY ' . $strCol . '
-                ORDER BY ' . $strCol
-            );
+            $statement = $this
+                ->connection
+                ->createQueryBuilder()
+                ->select($strCol . ', COUNT(' . $strCol . ') as mm_count')
+                ->from($this->getMetaModel()->getTableName())
+                ->groupBy($strCol)
+                ->orderBy($strCol)
+                ->execute();
         } else {
             return \array_intersect_key(
                 $this->getLanguageNames(),
@@ -237,13 +292,13 @@ class LangCode extends BaseSimple
         }
 
         $arrResult = array();
-        while ($objRow->next()) {
+        while ($objRow = $statement->fetch(\PDO::FETCH_OBJ)) {
             if (is_array($arrCount)) {
                 $arrCount[$objRow->$strCol] = $objRow->mm_count;
             }
-
             $arrResult[$objRow->$strCol] = ($languages[$objRow->$strCol]) ?: $objRow->$strCol;
         }
+
         return $arrResult;
     }
 
