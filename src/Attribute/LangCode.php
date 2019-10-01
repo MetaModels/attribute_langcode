@@ -197,7 +197,7 @@ class LangCode extends BaseSimple
         // Fetch real language values.
         foreach ($keys as $key) {
             if (isset($languageValues[$key])) {
-                $aux[$key]  =  Utf8::toAscii($languageValues[$key]);
+                $aux[$key]  = Utf8::toAscii($languageValues[$key]);
                 $real[$key] = $languageValues[$key];
             }
         }
