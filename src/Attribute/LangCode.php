@@ -19,6 +19,7 @@
  * @author     Stefan Heimes <stefan_heimes@hotmail.com>
  * @author     David Molineus <david.molineus@netzmacht.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
+ * @author     Benedict Zinke <bz@presentprogressive.de>
  * @copyright  2012-2019 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
@@ -34,6 +35,7 @@ use MetaModels\Attribute\BaseSimple;
 use MetaModels\Helper\TableManipulator;
 use MetaModels\IMetaModel;
 use MetaModels\Render\Template;
+use Patchwork\Utf8;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -195,7 +197,7 @@ class LangCode extends BaseSimple
         // Fetch real language values.
         foreach ($keys as $key) {
             if (isset($languageValues[$key])) {
-                $aux[$key]  = \utf8_romanize($languageValues[$key]);
+                $aux[$key]  =  Utf8::toAscii($languageValues[$key]);
                 $real[$key] = $languageValues[$key];
             }
         }
@@ -209,7 +211,7 @@ class LangCode extends BaseSimple
         $keys = \array_diff($keys, \array_keys($aux));
         if ($keys) {
             foreach ($keys as $key) {
-                $aux[$key]  = \utf8_romanize($languages[$key]);
+                $aux[$key]  = Utf8::toAscii($languages[$key]);
                 $real[$key] = $languages[$key];
             }
         }
@@ -246,7 +248,7 @@ class LangCode extends BaseSimple
         $fallbackValues = $this->getLanguageNames($loadedLanguage);
         foreach ($keys as $key) {
             if (isset($fallbackValues[$key])) {
-                $aux[$key]  = \utf8_romanize($fallbackValues[$key]);
+                $aux[$key]  = Utf8::toAscii($fallbackValues[$key]);
                 $real[$key] = $fallbackValues[$key];
             }
         }
