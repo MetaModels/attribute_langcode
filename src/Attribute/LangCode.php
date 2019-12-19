@@ -20,6 +20,7 @@
  * @author     David Molineus <david.molineus@netzmacht.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     Benedict Zinke <bz@presentprogressive.de>
+ * @author     Ingolf Steinhardt <info@e-spin.de>
  * @copyright  2012-2019 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
@@ -111,7 +112,7 @@ class LangCode extends BaseSimple
      */
     public function getSQLDataType()
     {
-        return 'varchar(5) NOT NULL default \'\'';
+        return 'varchar(5) NULL';
     }
 
     /**
@@ -332,5 +333,15 @@ class LangCode extends BaseSimple
         $countries = $this->getLanguages();
 
         return $countries[$strLangValue];
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * This is needed for compatibility with MySQL strict mode.
+     */
+    public function serializeData($value)
+    {
+        return $value === '' ? null : $value;
     }
 }
