@@ -7,3 +7,9 @@ services:
             - '@event_dispatcher'
         tags:
           - { name: metamodels.attribute_factory }
+
+    MetaModels\AttributeLangCodeBundle\Migration\AllowNullMigration:
+        arguments:
+            - '@database_connection'
+        tags:
+            - name: contao.migration
