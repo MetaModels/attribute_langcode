@@ -18,10 +18,13 @@
  * @filesource
  */
 
+declare(strict_types = 1);
+
 namespace MetaModels\AttributeLangCodeBundle\Test\DependencyInjection;
 
 use MetaModels\AttributeLangCodeBundle\Attribute\AttributeTypeFactory;
 use MetaModels\AttributeLangCodeBundle\DependencyInjection\MetaModelsAttributeLangCodeExtension;
+use MetaModels\AttributeLangCodeBundle\Migration\AllowNullMigration;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -50,25 +53,39 @@ class MetaModelsAttributeLangCodeExtensionTest extends TestCase
      *
      * @return void
      */
-    public function testFactoryIsRegistered()
+    public function testRegistersServices()
     {
         $container = $this->getMockBuilder(ContainerBuilder::class)->getMock();
 
         $container
-            ->expects($this->once())
+            ->expects($this->exactly(2))
             ->method('setDefinition')
-            ->with(
-                'metamodels.attribute_langcode.factory',
-                $this->callback(
-                    function ($value) {
-                        /** @var Definition $value */
-                        $this->assertInstanceOf(Definition::class, $value);
-                        $this->assertEquals(AttributeTypeFactory::class, $value->getClass());
-                        $this->assertCount(1, $value->getTag('metamodels.attribute_factory'));
+            ->withConsecutive(
+                [
+                    'metamodels.attribute_langcode.factory',
+                    $this->callback(
+                        function ($value) {
+                            /** @var Definition $value */
+                            $this->assertInstanceOf(Definition::class, $value);
+                            $this->assertEquals(AttributeTypeFactory::class, $value->getClass());
+                            $this->assertCount(1, $value->getTag('metamodels.attribute_factory'));
 
-                        return true;
-                    }
-                )
+                            return true;
+                        }
+                    )
+                ],
+                [
+                    AllowNullMigration::class,
+                    $this->callback(
+                        function ($value) {
+                            /** @var Definition $value */
+                            $this->assertInstanceOf(Definition::class, $value);
+                            $this->assertCount(1, $value->getTag('contao.migration'));
+
+                            return true;
+                        }
+                    )
+                ]
             );
 
         $extension = new MetaModelsAttributeLangCodeExtension();
