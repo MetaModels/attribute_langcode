@@ -271,21 +271,21 @@ class LangCode extends BaseSimple
             $statement = $this
                 ->connection
                 ->createQueryBuilder()
-                ->select($strCol . ', COUNT(' . $strCol . ') as mm_count')
-                ->from($this->getMetaModel()->getTableName())
-                ->where('id IN (:ids)')
-                ->groupBy($strCol)
-                ->orderBy('FIELD(id, :ids)')
+                ->select('t.' . $strCol . ', COUNT(t.' . $strCol . ') as mm_count')
+                ->from($this->getMetaModel()->getTableName(), 't')
+                ->where('t.id IN (:ids)')
+                ->groupBy('t.' . $strCol)
+                ->orderBy('FIELD(t.id, :ids)')
                 ->setParameter('ids', $idList, Connection::PARAM_STR_ARRAY)
                 ->execute();
         } elseif ($usedOnly) {
             $statement = $this
                 ->connection
                 ->createQueryBuilder()
-                ->select($strCol . ', COUNT(' . $strCol . ') as mm_count')
-                ->from($this->getMetaModel()->getTableName())
-                ->groupBy($strCol)
-                ->orderBy($strCol)
+                ->select('t.' . $strCol . ', COUNT(t.' . $strCol . ') as mm_count')
+                ->from($this->getMetaModel()->getTableName(), 't')
+                ->groupBy('t.' . $strCol)
+                ->orderBy('t.' . $strCol)
                 ->execute();
         } else {
             return \array_intersect_key(
