@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_langcode.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2021 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,7 +21,7 @@
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     Benedict Zinke <bz@presentprogressive.de>
  * @author     Ingolf Steinhardt <info@e-spin.de>
- * @copyright  2012-2019 The MetaModels team.
+ * @copyright  2012-2021 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -165,7 +165,7 @@ class LangCode extends BaseSimple
     protected function getLanguageNames($language = null)
     {
         $event = new LoadLanguageFileEvent('languages', $language, true);
-        $this->eventDispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
+        $this->eventDispatcher->dispatch($event, ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE);
 
         return $GLOBALS['TL_LANG']['LNG'];
     }
@@ -226,7 +226,7 @@ class LangCode extends BaseSimple
         // Switch back to the original FE language to not disturb the frontend.
         if ($loadedLanguage != $GLOBALS['TL_LANGUAGE']) {
             $event = new LoadLanguageFileEvent('languages', null, true);
-            $this->eventDispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
+            $this->eventDispatcher->dispatch($event, ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE);
         }
 
         return $this->languageCache = $return;
