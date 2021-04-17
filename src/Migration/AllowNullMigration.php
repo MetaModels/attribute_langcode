@@ -27,6 +27,7 @@ use Contao\CoreBundle\Migration\AbstractMigration;
 use Contao\CoreBundle\Migration\MigrationResult;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\FetchMode;
+use Doctrine\DBAL\Schema\Column;
 
 /**
  * This migration changes all database columns to allow null values.
@@ -120,7 +121,15 @@ class AllowNullMigration extends AbstractMigration
 
         $result = [];
         foreach ($langColumns as $tableName => $tableColumnNames) {
-            $columns = $schemaManager->listTableColumns($tableName);
+            /** @var Column[] $columns */
+            $columns = [];
+            // The schema manager return the column list with lowercase keys, wo got to use the real names.
+            \array_map(
+                function (Column $column) use (&$columns) {
+                    $columns[$column->getName()] = $column;
+                },
+                $schemaManager->listTableColumns($tableName)
+            );
             foreach ($tableColumnNames as $tableColumnName) {
                 $column = ($columns[$tableColumnName] ?? null);
                 if (null === $column) {
