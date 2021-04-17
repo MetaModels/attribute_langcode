@@ -126,7 +126,7 @@ class AllowNullMigration extends AbstractMigration
                 if (null === $column) {
                     continue;
                 }
-                if (true === $column->getNotnull()) {
+                if (null !== $column->getDefault()) {
                     if (!isset($result[$tableName])) {
                         $result[$tableName] = [];
                     }
