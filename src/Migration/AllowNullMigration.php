@@ -26,7 +26,9 @@ namespace MetaModels\AttributeLangCodeBundle\Migration;
 use Contao\CoreBundle\Migration\AbstractMigration;
 use Contao\CoreBundle\Migration\MigrationResult;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\FetchMode;
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ColumnDiff;
+use Doctrine\DBAL\Schema\TableDiff;
 
 /**
  * This migration changes all database columns to allow null values.
@@ -95,10 +97,10 @@ class AllowNullMigration extends AbstractMigration
     {
         $langColumns = $this->fetchNonNullableColumns();
         $message     = [];
-        foreach ($langColumns as $tableName => $tableColumnNames) {
-            foreach ($tableColumnNames as $tableColumnName) {
-                $this->fixColumn($tableName, $tableColumnName);
-                $message[] = $tableName . '.' . $tableColumnName;
+        foreach ($langColumns as $tableName => $tableColumns) {
+            foreach ($tableColumns as $tableColumn) {
+                $this->fixColumn($tableName, $tableColumn);
+                $message[] = $tableName . '.' . $tableColumn->getName();
             }
         }
 
@@ -120,17 +122,25 @@ class AllowNullMigration extends AbstractMigration
 
         $result = [];
         foreach ($langColumns as $tableName => $tableColumnNames) {
-            $columns = $schemaManager->listTableColumns($tableName);
+            /** @var Column[] $columns */
+            $columns = [];
+            // The schema manager return the column list with lowercase keys, wo got to use the real names.
+            \array_map(
+                function (Column $column) use (&$columns) {
+                    $columns[$column->getName()] = $column;
+                },
+                $schemaManager->listTableColumns($tableName)
+            );
             foreach ($tableColumnNames as $tableColumnName) {
                 $column = ($columns[$tableColumnName] ?? null);
                 if (null === $column) {
                     continue;
                 }
-                if (true === $column->getNotnull()) {
+                if (null !== $column->getDefault()) {
                     if (!isset($result[$tableName])) {
                         $result[$tableName] = [];
                     }
-                    $result[$tableName][] = $tableColumnName;
+                    $result[$tableName][] = $column;
                 }
             }
         }
@@ -154,7 +164,7 @@ class AllowNullMigration extends AbstractMigration
             ->where('attribute.type=:type')
             ->setParameter('type', 'langcode')
             ->execute()
-            ->fetchAll(FetchMode::ASSOCIATIVE);
+            ->fetchAllAssociative();
 
         $result = [];
         foreach ($langColumns as $langColumn) {
@@ -170,15 +180,33 @@ class AllowNullMigration extends AbstractMigration
     /**
      * Fix a table column.
      *
-     * @param string $tableName  The name of the table.
-     * @param string $columnName The name of the column.
+     * @param string $tableName The name of the table.
+     * @param Column $column    The column.
      *
      * @return void
      */
-    private function fixColumn(string $tableName, string $columnName): void
+    private function fixColumn(string $tableName, Column $column): void
     {
-        $this->connection->query(
-            sprintf('ALTER TABLE %1$s CHANGE %1$s.%2$s %1$s.%2$s varchar(5) NULL', $tableName, $columnName)
-        );
+        $manager = $this->connection->getSchemaManager();
+        $table   = $manager->listTableDetails($tableName);
+
+        $changeColumn = new Column($column->getName(), $column->getType());
+        $changeColumn
+            ->setLength($column->getLength())
+            ->setNotnull(false)
+            ->setDefault(null);
+        $columnDiff = new ColumnDiff($column->getName(), $changeColumn);
+
+        $tableDiff                   = new TableDiff($tableName);
+        $tableDiff->fromTable        = $table;
+        $tableDiff->changedColumns[] = $columnDiff;
+
+        $manager->alterTable($tableDiff);
+
+        $this->connection->createQueryBuilder()
+            ->update($tableName, 't')
+            ->set('t.' . $column->getName(), 'null')
+            ->where('t.' . $column->getName() . ' = ""')
+            ->execute();
     }
 }
