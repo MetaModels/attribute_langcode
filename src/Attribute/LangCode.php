@@ -36,8 +36,8 @@ use MetaModels\Attribute\BaseSimple;
 use MetaModels\Helper\TableManipulator;
 use MetaModels\IMetaModel;
 use MetaModels\Render\Template;
-use Patchwork\Utf8;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\String\UnicodeString;
 
 /**
  * This is the MetaModelAttribute class for handling langcodes.
@@ -165,7 +165,7 @@ class LangCode extends BaseSimple
     protected function getLanguageNames($language = null)
     {
         $event = new LoadLanguageFileEvent('languages', $language, true);
-        $this->eventDispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
+        $this->eventDispatcher->dispatch($event, ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE);
 
         return $GLOBALS['TL_LANG']['LNG'];
     }
@@ -178,8 +178,6 @@ class LangCode extends BaseSimple
      * @return string[]
      *
      * @SuppressWarnings("PHPMD.CyclomaticComplexity")
-     * @SuppressWarnings(PHPMD.Superglobals)
-     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     protected function getLanguages()
     {
@@ -190,15 +188,14 @@ class LangCode extends BaseSimple
 
         $loadedLanguage = $this->getMetaModel()->getActiveLanguage();
         $languageValues = $this->getLanguageNames($loadedLanguage);
-        $languages      = $this->getRealLanguages();
-        $keys           = \array_keys($languages);
+        $keys           = \array_keys($languageValues);
         $aux            = [];
         $real           = [];
 
         // Fetch real language values.
         foreach ($keys as $key) {
             if (isset($languageValues[$key])) {
-                $aux[$key]  = Utf8::toAscii($languageValues[$key]);
+                $aux[$key]  = (new UnicodeString($languageValues[$key]))->ascii()->toString();
                 $real[$key] = $languageValues[$key];
             }
         }
@@ -213,7 +210,7 @@ class LangCode extends BaseSimple
         $keys = \array_diff($keys, \array_keys($aux));
         if ($keys) {
             foreach ($keys as $key) {
-                $aux[$key]  = Utf8::toAscii($languages[$key]);
+                $aux[$key]  = (new UnicodeString($languages[$key]))->ascii()->toString();
                 $real[$key] = $languages[$key];
             }
         }
@@ -227,7 +224,7 @@ class LangCode extends BaseSimple
         // Switch back to the original FE language to not disturb the frontend.
         if ($loadFallback) {
             $event = new LoadLanguageFileEvent('languages', null, true);
-            $this->eventDispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
+            $this->eventDispatcher->dispatch($event, ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE);
         }
 
         return $this->languageCache = $return;
@@ -250,7 +247,7 @@ class LangCode extends BaseSimple
         $fallbackValues = $this->getLanguageNames($loadedLanguage);
         foreach ($keys as $key) {
             if (isset($fallbackValues[$key])) {
-                $aux[$key]  = Utf8::toAscii($fallbackValues[$key]);
+                $aux[$key]  = (new UnicodeString($fallbackValues[$key]))->ascii()->toString();
                 $real[$key] = $fallbackValues[$key];
             }
         }
@@ -278,7 +275,7 @@ class LangCode extends BaseSimple
                 ->groupBy('t.' . $strCol)
                 ->orderBy('FIELD(t.id, :ids)')
                 ->setParameter('ids', $idList, Connection::PARAM_STR_ARRAY)
-                ->execute();
+                ->executeQuery();
         } elseif ($usedOnly) {
             $statement = $this
                 ->connection
@@ -287,7 +284,7 @@ class LangCode extends BaseSimple
                 ->from($this->getMetaModel()->getTableName(), 't')
                 ->groupBy('t.' . $strCol)
                 ->orderBy('t.' . $strCol)
-                ->execute();
+                ->executeQuery();
         } else {
             return \array_intersect_key(
                 $this->getLanguageNames(),
@@ -296,11 +293,11 @@ class LangCode extends BaseSimple
         }
 
         $arrResult = array();
-        while ($objRow = $statement->fetch(\PDO::FETCH_OBJ)) {
+        while ($objRow = $statement->fetchAssociative()) {
             if (is_array($arrCount)) {
-                $arrCount[$objRow->$strCol] = $objRow->mm_count;
+                $arrCount[$objRow->$strCol] = $objRow['mm_count'];
             }
-            $arrResult[$objRow->$strCol] = ($languages[$objRow->$strCol]) ?: $objRow->$strCol;
+            $arrResult[$objRow[$strCol]] = ($languages[$objRow[$strCol]]) ?: $objRow[$strCol];
         }
 
         return $arrResult;
@@ -333,7 +330,7 @@ class LangCode extends BaseSimple
     {
         $countries = $this->getLanguages();
 
-        return $countries[$strLangValue];
+        return $countries[$strLangValue] ?? '';
     }
 
     /**
