@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_langcode.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2021 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,7 +14,7 @@
  * @author     Christian Schiffler <c.schiffler@cyberspectrum.de>
  * @author     David Molineus <david.molineus@netzmacht.de>
  * @author     Sven Baumann <baumann.sv@gmail.com>
- * @copyright  2012-2019 The MetaModels team.
+ * @copyright  2012-2021 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -27,11 +27,14 @@ use MetaModels\AttributeLangCodeBundle\Attribute\AttributeTypeFactory;
 use MetaModels\AttributeLangCodeBundle\Attribute\LangCode;
 use MetaModels\Helper\TableManipulator;
 use MetaModels\IMetaModel;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Test the attribute factory.
+ *
+ * @covers \MetaModels\AttributeLangCodeBundle\Attribute\AttributeTypeFactory
  */
 class LangCodeAttributeTypeFactoryTest extends TestCase
 {
@@ -48,22 +51,22 @@ class LangCodeAttributeTypeFactoryTest extends TestCase
      */
     protected function mockMetaModel($tableName, $language, $fallbackLanguage)
     {
-        $metaModel = $this->getMockBuilder('MetaModels\IMetaModel')->getMock();
+        $metaModel = $this->getMockBuilder(IMetaModel::class)->getMock();
 
         $metaModel
-            ->expects($this->any())
+            ->expects(self::any())
             ->method('getTableName')
-            ->will($this->returnValue($tableName));
+            ->willReturn($tableName);
 
         $metaModel
-            ->expects($this->any())
+            ->expects(self::any())
             ->method('getActiveLanguage')
-            ->will($this->returnValue($language));
+            ->willReturn($language);
 
         $metaModel
-            ->expects($this->any())
+            ->expects(self::any())
             ->method('getFallbackLanguage')
-            ->will($this->returnValue($fallbackLanguage));
+            ->willReturn($fallbackLanguage);
 
         return $metaModel;
     }
@@ -71,7 +74,7 @@ class LangCodeAttributeTypeFactoryTest extends TestCase
     /**
      * Mock the database connection.
      *
-     * @return \PHPUnit_Framework_MockObject_MockObject|Connection
+     * @return MockObject|Connection
      */
     private function mockConnection()
     {
@@ -85,7 +88,7 @@ class LangCodeAttributeTypeFactoryTest extends TestCase
      *
      * @param Connection $connection The database connection mock.
      *
-     * @return TableManipulator|\PHPUnit_Framework_MockObject_MockObject
+     * @return TableManipulator|MockObject
      */
     private function mockTableManipulator(Connection $connection)
     {
@@ -126,10 +129,10 @@ class LangCodeAttributeTypeFactoryTest extends TestCase
             $this->mockMetaModel('mm_test', 'de', 'en')
         );
 
-        $this->assertInstanceOf(LangCode::class, $attribute);
+        self::assertInstanceOf(LangCode::class, $attribute);
 
         foreach ($values as $key => $value) {
-            $this->assertEquals($value, $attribute->get($key), $key);
+            self::assertEquals($value, $attribute->get($key), $key);
         }
     }
 }

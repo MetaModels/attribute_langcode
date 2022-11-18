@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_langcode.
  *
- * (c) 2012-2019 The MetaModels team.
+ * (c) 2012-2022 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,7 +21,7 @@
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     Benedict Zinke <bz@presentprogressive.de>
  * @author     Ingolf Steinhardt <info@e-spin.de>
- * @copyright  2012-2019 The MetaModels team.
+ * @copyright  2012-2022 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -204,8 +204,9 @@ class LangCode extends BaseSimple
         }
 
         // Add needed fallback values.
-        $keys = \array_diff($keys, \array_keys($aux));
-        if ($keys) {
+        $keys         = \array_diff($keys, \array_keys($aux));
+        $loadFallback = !empty($keys) && ($loadedLanguage !== $this->getMetaModel()->getFallbackLanguage());
+        if ($loadFallback) {
             $this->addNeededFallbackLanguages($keys, $aux, $real);
         }
 
@@ -224,7 +225,7 @@ class LangCode extends BaseSimple
         }
 
         // Switch back to the original FE language to not disturb the frontend.
-        if ($loadedLanguage != $GLOBALS['TL_LANGUAGE']) {
+        if ($loadFallback) {
             $event = new LoadLanguageFileEvent('languages', null, true);
             $this->eventDispatcher->dispatch(ContaoEvents::SYSTEM_LOAD_LANGUAGE_FILE, $event);
         }
@@ -271,21 +272,21 @@ class LangCode extends BaseSimple
             $statement = $this
                 ->connection
                 ->createQueryBuilder()
-                ->select($strCol . ', COUNT(' . $strCol . ') as mm_count')
-                ->from($this->getMetaModel()->getTableName())
-                ->where('id IN (:ids)')
-                ->groupBy($strCol)
-                ->orderBy('FIELD(id, :ids)')
+                ->select('t.' . $strCol . ', COUNT(t.' . $strCol . ') as mm_count')
+                ->from($this->getMetaModel()->getTableName(), 't')
+                ->where('t.id IN (:ids)')
+                ->groupBy('t.' . $strCol)
+                ->orderBy('FIELD(t.id, :ids)')
                 ->setParameter('ids', $idList, Connection::PARAM_STR_ARRAY)
                 ->execute();
         } elseif ($usedOnly) {
             $statement = $this
                 ->connection
                 ->createQueryBuilder()
-                ->select($strCol . ', COUNT(' . $strCol . ') as mm_count')
-                ->from($this->getMetaModel()->getTableName())
-                ->groupBy($strCol)
-                ->orderBy($strCol)
+                ->select('t.' . $strCol . ', COUNT(t.' . $strCol . ') as mm_count')
+                ->from($this->getMetaModel()->getTableName(), 't')
+                ->groupBy('t.' . $strCol)
+                ->orderBy('t.' . $strCol)
                 ->execute();
         } else {
             return \array_intersect_key(
