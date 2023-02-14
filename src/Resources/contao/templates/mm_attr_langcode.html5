@@ -1,1 +1,1 @@
-<span class="langcode_<?php echo $this->raw; ?><?php echo $this->additional_class; ?>"><?php echo $this->value; ?></span>
+<span class="text langcode<?php if($this->raw): ?> <?= $this->raw ?><?php endif; ?><?= $this->additional_class ?>"><?= $this->value ?></span>
