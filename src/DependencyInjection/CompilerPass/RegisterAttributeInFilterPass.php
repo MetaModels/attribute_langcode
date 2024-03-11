@@ -11,27 +11,28 @@
  * This project is provided in good faith and hope to be usable by anyone.
  *
  * @package    MetaModels/attribute_langcode
- * @author     David Molineus <david.molineus@netzmacht.de>
  * @author     Ingolf Steinhardt <info@e-spin.de>
  * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
 
-namespace MetaModels\AttributeLangCodeBundle;
+namespace MetaModels\AttributeLangCodeBundle\DependencyInjection\CompilerPass;
 
-use MetaModels\AttributeLangCodeBundle\DependencyInjection\CompilerPass\RegisterAttributeInFilterPass;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 /**
- * The Bundle class.
+ * This pass adds the tagged factories to the MetaModels factories.
  */
-class MetaModelsAttributeLangCodeBundle extends Bundle
+class RegisterAttributeInFilterPass implements CompilerPassInterface
 {
-    public function build(ContainerBuilder $container): void
+    public function process(ContainerBuilder $container): void
     {
-        parent::build($container);
-        $container->addCompilerPass(new RegisterAttributeInFilterPass());
+        if ($container->hasDefinition('metamodels.filter_setting_factory.simplelookup')) {
+            $container
+                ->getDefinition('metamodels.filter_setting_factory.simplelookup')
+                ->addMethodCall('addKnownAttributeType', ['langcode']);
+        }
     }
 }
