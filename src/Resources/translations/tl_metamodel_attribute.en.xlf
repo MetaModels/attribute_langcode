@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" datatype="plaintext" original="src/Resources/translations/tl_metamodel_attribute.en.xlf">
+    <body>
+      <trans-unit id="typeOptions.langcode" resname="typeOptions.langcode">
+        <source>Langcode</source>
+      </trans-unit>
+      <trans-unit id="langcodes.label" resname="langcodes.label">
+        <source>Langcode</source>
+      </trans-unit>
+      <trans-unit id="langcodes.description" resname="langcodes.description">
+        <source>Select the langcode.</source>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
