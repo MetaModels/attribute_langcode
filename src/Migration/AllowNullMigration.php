@@ -120,6 +120,10 @@ class AllowNullMigration extends AbstractMigration
 
         $result = [];
         foreach ($langColumns as $tableName => $tableColumnNames) {
+            if (!$schemaManager->tablesExist([$tableName])) {
+                continue;
+            }
+
             /** @var Column[] $columns */
             $columns = [];
             // The schema manager return the column list with lowercase keys, wo got to use the real names.
