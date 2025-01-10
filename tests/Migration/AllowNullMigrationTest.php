@@ -3,7 +3,7 @@
 /**
  * This file is part of MetaModels/attribute_langcode.
  *
- * (c) 2012-2023 The MetaModels team.
+ * (c) 2012-2024 The MetaModels team.
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -13,7 +13,7 @@
  * @package    MetaModels/attribute_langcode
  * @author     Sven Baumann <baumann.sv@gmail.com>
  * @author     Ingolf Steinhardt <info@e-spin.de>
- * @copyright  2012-2023 The MetaModels team.
+ * @copyright  2012-2024 The MetaModels team.
  * @license    https://github.com/MetaModels/attribute_langcode/blob/master/LICENSE LGPL-3.0-or-later
  * @filesource
  */
@@ -56,7 +56,7 @@ class AllowNullMigrationTest extends TestCase
             ]
         ];
 
-        yield 'attribute select not configured' => [
+        yield 'attribute not configured' => [
             (object) [
                 'requiredTablesExist' => true,
                 'shouldRun'           => false,
@@ -64,7 +64,7 @@ class AllowNullMigrationTest extends TestCase
             ]
         ];
 
-        yield 'attribute select is configured' => [
+        yield 'attribute is configured' => [
             (object) [
                 'requiredTablesExist' => true,
                 'shouldRun'           => false,
@@ -97,14 +97,17 @@ class AllowNullMigrationTest extends TestCase
         $manager    = $this
             ->getMockBuilder(AbstractSchemaManager::class)
             ->setConstructorArgs([$connection, $platform])
-            ->onlyMethods(['tablesExist', 'introspectTable', 'alterTable'])
+            ->onlyMethods(['listTableNames', 'introspectTable', 'alterTable'])
             ->getMockForAbstractClass();
 
         $manager
             ->expects(self::once())
-            ->method('tablesExist')
-            ->with(['tl_metamodel', 'tl_metamodel_attribute'])
-            ->willReturn($configuration->requiredTablesExist);
+            ->method('listTableNames')
+            ->willReturn(
+                $configuration->requiredTablesExist
+                    ? ['tl_metamodel', 'tl_metamodel_attribute', 'mm_table_1', 'mm_table_2']
+                    : []
+            );
 
         $connection
             ->expects(
